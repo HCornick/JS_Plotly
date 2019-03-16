@@ -1,1 +1,1 @@
-web: gunicorn app:app
+web: gunicorn JS_Plotly.app:app
