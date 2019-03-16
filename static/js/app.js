@@ -6,7 +6,6 @@ function buildMetadata(sample) {
   // Use `d3.json` to fetch the metadata for a sample
   d3.json(sampleUrl).then((sampleDict) => {
 
-  
     // Use d3 to select the panel with id of `#sample-metadata`
     var sampleMeta = d3.select("#sample-metadata");
 
@@ -21,9 +20,69 @@ function buildMetadata(sample) {
       var row = sampleMeta.append("h5")
       row.text(key +" : "+ value)
     })
-  })
+
     // BONUS: Build the Gauge Chart
     // buildGauge(data.WFREQ);
+    // Select WFREQ and set as variable
+    var wfreq = sampleDict.WFREQ;
+    // Divide WFREQ into 9 equal parts (as the gauge is), thus 180/9 = 20 degrees
+    var angle = 180 - (wfreq * 20),
+        // Set the length of the gauge pointer
+        radius = 0.5;
+    var radians = angle * Math.PI / 180;
+    var x = radius * Math.cos(radians);
+    var y = radius * Math.sin(radians);
+    // Set direction of outer lines of gauge pointer object
+    var mainPath = 'M -.0 -0.05 L .0 0.05 L ',
+        xPath = String(x),
+        space = ' ',
+        yPath = String(y),
+        endPath = ' Z';
+    var path = mainPath.concat(xPath, space, yPath, endPath);
+
+    var data = [{ type: 'scatter',
+      x: [0], y:[0],
+        marker: {size: 1, color:'850000'},
+        showlegend: false,
+        name: 'washes',
+        text: wfreq,
+        hoverinfo: 'text+name'},
+      { values: [50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50/9, 50],
+      rotation: 90,
+      text: ['8-9', '7-8', '6-7', '5-6', '4-5', '3-4', '2-3',
+                '1-2', '0-1', ''],
+      textinfo: 'text',
+      textposition:'inside',
+      marker: {colors:['rgba(0, 50, 0, .5)', 'rgba(0, 75, 0, .5)',
+                            'rgba(0, 100, 0, .5)', 'rgba(14, 127, 0, .5)',
+                            'rgba(110, 154, 22, .5)', 'rgba(170, 202, 42, .5)',
+                            'rgba(202, 209, 95, .5)', 'rgba(210, 206, 145, .5)',
+                            'rgba(232, 226, 202, .5)', 'rgba(255, 255, 255, 0)']},
+      labels: ['8-9', '7-8', '6-7', '5-6', '4-5', '3-4', '2-3', '1-2', '0-1', ''],
+      hoverinfo: 'label',
+      hole: .5,
+      type: 'pie',
+      showlegend: false
+    }];
+
+    var layout = {
+      shapes:[{
+          type: 'path',
+          path: path,
+          // Set the color for the pointer
+          fillcolor: '850000',
+          line: {
+            color: '850000'
+          }
+        }],
+      title: '<b> Belly Button Wash Frequency </b><br> Scrubs per Week',
+      xaxis: {zeroline:false, showticklabels:false,
+                showgrid: false, range: [-1, 1]},
+      yaxis: {zeroline:false, showticklabels:false,
+                showgrid: false, range: [-1, 1]}
+    };
+    Plotly.newPlot('gauge', data, layout);
+  })
 }
 
 function buildCharts(sample) {
